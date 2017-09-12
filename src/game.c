@@ -3,6 +3,16 @@
 #include "gf2d_sprite.h"
 #include "simple_logger.h"
 
+typedef struct
+{
+	void *data;
+	size_t numElements;
+	size_t elementSize; 
+}PriorityQueue;
+
+PriorityQueue *pq_new();
+void pq_delete(PriorityQueue *pq);
+void *pq_get_max(PriorityQueue *pq
 int main(int argc, char * argv[])
 {
     /*variable declarations*/
