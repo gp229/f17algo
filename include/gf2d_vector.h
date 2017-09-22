@@ -24,6 +24,7 @@
 
 #include "gf2d_types.h"
 
+
 /*
  * The Vector Types
  * Not to be confused with the vector lists from STL
