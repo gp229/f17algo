@@ -10,7 +10,7 @@ typedef struct
 	int width;
 }Brick;
 
-void draw_stack(Sprite *brick, Vector2D start, Brick *bricklist, unsigned int count)
+void draw_stack(Sprite *brick, Vector2D start, Brick **bricklist, unsigned int count)
 {
 	unsigned int i, j;
 	int brickheight = 32;
@@ -21,9 +21,9 @@ void draw_stack(Sprite *brick, Vector2D start, Brick *bricklist, unsigned int co
 	for (i = 0; i < count; i++)
 	{
 		//vertical draw
-		drawPosition.x = start.x - ((bricklist[i].width * brickwidth) / 2);
+		drawPosition.x = start.x - ((bricklist[i]->width * brickwidth) / 2);
 		drawPosition.y = start.y - ((i + 1) * brickheight);
-		for (j = 0; j < bricklist[i].width; j++)
+		for (j = 0; j < bricklist[i]->width; j++)
 		{
 			//horizontal draw
 			drawPosition.x += brickwidth;
@@ -55,7 +55,7 @@ int main(int argc, char * argv[])
 	Node *queue = NULL;
 	int i;
 	int *j;
-	Brick * sortedList;
+	Brick * sortedList[10];
 
 	static Brick bricklist[] =
 	{
@@ -71,6 +71,7 @@ int main(int argc, char * argv[])
 		{ 22 }
 	};
 
+	Node *head, *tail = NULL;
 
 	for (i = 0; i < sizeof(bricklist) / sizeof(*bricklist); i++)
 	{
@@ -78,7 +79,7 @@ int main(int argc, char * argv[])
 	}
 	for (i = 0; i < sizeof(bricklist) / sizeof(*bricklist); i++)
 	{
-		sortedList = (Brick *)linklist_delete_max(queue);
+		sortedList[i] = (Brick *)linklist_delete_max(queue);
 	}
 	
 

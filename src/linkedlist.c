@@ -3,7 +3,6 @@
 #include <SDL.h>
 #include <string.h>
 
-
 Node * linklist_new_node(Node *head, void *newData, int newPriority)
 {
 	Node *newNode = NULL;
@@ -31,12 +30,23 @@ Node * linklist_new_node(Node *head, void *newData, int newPriority)
 		return NULL;
 	}
 	memset(newNode, 0, sizeof(Node));
-	newNode->next = NULL;
+	newNode->next = head; 
+	head = newNode;
 	newNode->data = newData;
 	newNode->priority = newPriority;
-	head->next = newNode;
 	return head;
 	}
+}
+
+void * swap(Node **head)
+{
+	void *data;
+	Node * nextNode = *head;
+	data = nextNode->data;
+	*nextNode = *nextNode->next;
+	//*next = &headNode;
+	//*head = &headNode;
+	return data;
 }
 
  void * linklist_delete_max(Node *head)
@@ -46,14 +56,12 @@ Node * linklist_new_node(Node *head, void *newData, int newPriority)
 	Node *maxNode = NULL;
 	Node *previousNode = head;
 	Node *maxPrevious = NULL;
+	void *data;
 
-	if (!head)
+	if (!head) return NULL;
+	if (head->next == NULL) 
 	{
-		 return NULL;
-	}
-	if (head->next == NULL)
-	{
-		return head->data;
+		return head->data;	
 	}
 
 	while (current != NULL)
@@ -70,17 +78,24 @@ Node * linklist_new_node(Node *head, void *newData, int newPriority)
 	}
 	if (head == maxNode)
 	{ 	
-		head = head->next;
-		maxNode->next = NULL;
-		return maxNode->data;
+		data = swap(&head);
+		return data;
 
 	}
-	else
-	{
-		maxPrevious->next = maxNode->next;
-		return maxNode->data;
-	}
+
+	maxPrevious->next = maxNode->next;
+	return maxNode->data;
+	
 	
 }
+
+
+ 
+	 
+
+
+
+
+
 
 /*eol@eof*/
