@@ -1,35 +1,48 @@
-#include <string.h>
-#include <stdlib.h>
-#include "linklist.h"
+#include "linkedlist.h"
 #include "simple_logger.h"
+#include <SDL.h>
+#include <string.h>
 
-Node * linklist_new_node()
+Node * enqueue(Node *node, void *newData)
 {
-	Node *node;
-	node = (Node *)malloc(sizeof(Node));
-	if (!node)
+	Node *newNode = NULL;
+	Node *head = node;
+	newNode = (Node *)malloc(sizeof(Node));
+	if (!newNode)
 	{
 		slog("unable to allocate new linklist node");
 		return NULL;
 	}
-	memset(node,0,sizeof(Node));
+	memset(newNode, 0, sizeof(Node));
+	newNode->next = NULL;
+	newNode->data = newData;
+	if (node == NULL || node->data == 0xdddddddd || node->data == NULL)
+	{
+		//head = newNode;
+		//tail = newNode;
+		return newNode;
+	}
+	while (head->next != NULL)
+	{
+		head = head->next;
+	}
+	head->next = newNode;
 	return node;
 }
 
-int linklist_free_node(Node *node)
+
+void * dequeue(Node **node)
 {
-	if (!node)
+	Node *current = *node;
+	void *data;
+	data = current->data;
+	if (*node != NULL)
 	{
-		slog("attempting to free a node that points to data");
-		return -2;
+		*node = (*node)->next;
+		free(current);
 	}
-	if (node->data != NULL)
-	{
-		slog("attempting to free a node that points to data");
-		return -1;
-	}
-	free(node);
-	return 0;
+	return data;
 }
+
 
 /*eol@eof*/

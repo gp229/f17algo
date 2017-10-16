@@ -3,44 +3,64 @@
 #include "gf2d_sprite.h"
 #include "simple_logger.h"
 #include "tilemap.h"
+#include "linkedlist.h"
+#include "breadthsearch.h"
 
 int main(int argc, char * argv[])
 {
-    /*variable declarations*/
-    int done = 0;
-    const Uint8 * keys;
-    Sprite *sprite;
-    
-    int mx,my;
-    float mf = 0;
-    Sprite *mouse;
-    TileMap *map;
-    Vector4D mouseColor = {0,0,255,200};
-    static Vector2D path[2];
-   
-    /*program initializtion*/
-    init_logger("gf2d.log");
-    slog("---==== BEGIN ====---");
-    gf2d_graphics_initialize(
-        "gf2d",
-        1200,
-        720,
-        1200,
-        720,
-        vector4d(0,0,0,255),
-        0);
-    gf2d_graphics_set_frame_delay(17);
-    gf2d_sprite_init(1024);
-    SDL_ShowCursor(SDL_DISABLE);
-    
-    /*demo setup*/
+	/*variable declarations*/
+	int done = 0;
+	const Uint8 * keys;
+	Sprite *sprite;
 
-    sprite = gf2d_sprite_load_image("images/backgrounds/bg_flat.png");
-    mouse = gf2d_sprite_load_all("images/pointer.png",32,32,16);
-    
-    map = tilemap_load("levels/tilemap.map");
-    vector2d_copy(path[0],map->start);
-    vector2d_copy(path[1],map->end);
+	int mx, my;
+	float mf = 0;
+	Sprite *mouse;
+	TileMap *map;
+	Vector4D mouseColor = { 0,0,255,200 };
+	static Vector2D *path;
+	PathResult *iter;
+	int i = 0;
+
+
+
+	/*program initializtion*/
+	init_logger("gf2d.log");
+	slog("---==== BEGIN ====---");
+	gf2d_graphics_initialize(
+		"gf2d",
+		1200,
+		720,
+		1200,
+		720,
+		vector4d(0, 0, 0, 255),
+		0);
+	gf2d_graphics_set_frame_delay(17);
+	gf2d_sprite_init(1024);
+	SDL_ShowCursor(SDL_DISABLE);
+
+	/*demo setup*/
+
+	sprite = gf2d_sprite_load_image("images/backgrounds/bg_flat.png");
+	mouse = gf2d_sprite_load_all("images/pointer.png", 32, 32, 16);
+
+	map = tilemap_load("levels/tilemap.map");
+	iter = bfs(map);
+	if(iter)
+	{
+		path = (Vector2D *)malloc(sizeof(Vector2D) * (iter->arraysize));
+		if (!path)
+		{
+			slog("unable to allocate graph");
+			return NULL;
+		}
+		memset(path, 0, (sizeof(Vector2D) * (iter->arraysize)));
+		for (i = 0; i <= iter->arraysize; i++)
+		{
+		vector2d_copy(path[i], iter->values[i]);
+		}
+	}
+	
     /*main game loop*/
     while(!done)
     {
@@ -57,7 +77,7 @@ int main(int argc, char * argv[])
             gf2d_sprite_draw_image(sprite,vector2d(0,0));
                         
             tilemap_draw(map,vector2d(86,24));
-            tilemap_draw_path(path,2, map,vector2d(86,24));
+            tilemap_draw_path(path,i, map,vector2d(86,24));
             //UI elements last
             gf2d_sprite_draw(
                 mouse,
