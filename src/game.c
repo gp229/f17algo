@@ -1,48 +1,155 @@
 #include <SDL.h>
+#include <stdio.h>
 #include "gf2d_graphics.h"
 #include "gf2d_sprite.h"
 #include "simple_logger.h"
+#include "gf2d_draw.h"
+#include "gf2d_collision.h"
+#include "hashmap.h"
 
-typedef struct
-{
-	void *data;
-	size_t numElements;
-	size_t elementSize; 
-}PriorityQueue;
-
-PriorityQueue *pq_new();
-void pq_delete(PriorityQueue *pq);
-void *pq_get_max(PriorityQueue *pq
 int main(int argc, char * argv[])
 {
-    /*variable declarations*/
-    int done = 0;
-    const Uint8 * keys;
-    Sprite *sprite;
-    
-    int mx,my;
-    float mf = 0;
-    Sprite *mouse;
-    Vector4D mouseColor = {255,100,255,200};
-    
-    /*program initializtion*/
-    init_logger("gf2d.log");
-    slog("---==== BEGIN ====---");
-    gf2d_graphics_initialize(
-        "gf2d",
-        1200,
-        720,
-        1200,
-        720,
-        vector4d(0,0,0,255),
-        0);
-    gf2d_graphics_set_frame_delay(16);
-    gf2d_sprite_init(1024);
-    SDL_ShowCursor(SDL_DISABLE);
-    
-    /*demo setup*/
-    sprite = gf2d_sprite_load_image("images/backgrounds/bg_flat.png");
-    mouse = gf2d_sprite_load_all("images/pointer.png",32,32,16);
+	/*variable declarations*/
+	int done = 0;
+	const Uint8 * keys;
+	Sprite *sprite = NULL;
+	hashmap *mymap;
+	char *temp;
+
+	int mx,my,i;
+	float mf = 0;
+	Sprite *mouse = NULL;
+	Vector4D mouseColor = {255,255,100,200};
+	Space *space = NULL;
+	static Body body[10000];// not a pointer!
+	Shape shape[4];// not a pointer!
+	/*program initializtion*/
+	init_logger("gf2d.log");
+	slog("---==== BEGIN ====---");
+	gf2d_graphics_initialize(
+		"gf2d",
+		1200,
+		720,
+		1200,
+		720,
+		vector4d(0,0,0,255),
+		0);
+	gf2d_graphics_set_frame_delay(16);
+	gf2d_sprite_init(1024);
+	SDL_ShowCursor(SDL_DISABLE);
+
+	/*demo setup*/
+	sprite = gf2d_sprite_load_image("images/backgrounds/bg_flat.png");
+	mouse = gf2d_sprite_load_all("images/pointer.png",32,32,16);
+
+	space = gf2d_space_new_full(
+		3,
+		gf2d_rect(0,0,1200,700),
+		0.1,
+		vector2d(0,0.1),
+		1,
+		0.1);
+
+	shape[0] = gf2d_shape_circle(0,0, 5);
+	shape[1] = gf2d_shape_circle(20,0, 25);
+	shape[2] = gf2d_shape_rect(-32,-32,64,64);
+	shape[3] = gf2d_shape_rect(-16,-16, 32,32);
+
+	mymap = hash_new(2);
+
+	mymap = insert(mymap, "1", "stuff");
+	mymap = insert(mymap, "11", "stuff");
+
+	mymap = insert(mymap, "21", "stuff");
+
+	mymap = insert(mymap, "2314fasdf", "stuff");
+	mymap = insert(mymap, "12342314reeeeqwrqwr", "stuff");
+
+	mymap = insert(mymap, "dfsadfasdfasdf", "stuff");
+	mymap = insert(mymap, "key745312453312341", "stuff");
+	mymap = insert(mymap, "asdfsdfvzvvxczv", "stuff");
+	mymap = insert(mymap, "qqqqqqqqweeeeeeeeeee", "delete this one");
+	mymap = insert(mymap, "rrrrrrrrrrrrrrr", "stuff");
+	mymap = insert(mymap, "tretertert", "stuff");
+	mymap = insert(mymap, "vczccvzxvvzxcv", "stuff");
+	mymap = insert(mymap, "key1313", "stuff");
+	mymap = insert(mymap, "key21", "stuff");
+	mymap = insert(mymap, "key31", "stuff");
+	mymap = insert(mymap, "key4432", "stuff123");
+	mymap = insert(mymap, "key54334", "stuff");
+	mymap = insert(mymap, "key6321", "stuff");
+	mymap = insert(mymap, "key733", "stuff");
+	mymap = insert(mymap, "key733112341234234", "stuff");
+	mymap = insert(mymap, "key7wqrqwer33", "stuff");
+	mymap = insert(mymap, "key1ewqr2341733", "stuff");
+	mymap = insert(mymap, "asdfadfkey23425733", "stuff");
+	mymap = insert(mymap, "key7453124533", "stuff");
+	mymap = insert(mymap, "key76342533", "stuff");
+	mymap = insert(mymap, "sdafasdfas", "stuff");
+	mymap = insert(mymap, "qwrqw231322222er", "stuff");
+	mymap = insert(mymap, "qwerqwerfsafazzz", "stuff");
+	print_hash(mymap);
+
+	temp = (char*)get(mymap, "key4432");
+	mymap = delete_hash(mymap, "key4432");
+	print_hash(mymap);
+
+
+//	gf2d_space_add_static_shape(space,gf2d_shape_rect(200,500, 512,32));
+	/* Stress test*/
+	for (i = 0; i < 100;i++)
+	{
+		gf2d_body_set(
+			&body[i],
+			"body",
+			ALL_LAYERS,
+			0,
+			vector2d(
+			600+(gf2d_crandom()*500),
+			360+(gf2d_crandom()*300)),
+			vector2d(gf2d_crandom(),gf2d_crandom()),
+			10,
+			1,
+			1,
+			&shape[0],
+			NULL,
+			NULL,
+			NULL);
+		gf2d_space_add_body(space,&body[i]);
+	}
+/* collision test*/
+//         gf2d_body_set(
+//             &body[0],
+//             "Body A",
+//             ALL_LAYERS,
+//             0,
+//             vector2d(100,300),
+//             vector2d(-1,0),
+//             1000,
+//             0,
+//             0,
+//             &shape[2],
+//             NULL,
+//             NULL,
+//             NULL);
+//          gf2d_space_add_body(space,&body[0]);
+//         gf2d_body_set(
+//             &body[1],
+//             "Body B",
+//             ALL_LAYERS,
+//             0,
+//             vector2d(600,340),
+//             vector2d(1,1),
+//             10,
+//             1,
+//             1,
+//             &shape[0],
+//             NULL,
+//             NULL,
+//             NULL);
+//         gf2d_space_add_body(space,&body[1]);
+
+ //*/
     /*main game loop*/
     while(!done)
     {
@@ -58,7 +165,9 @@ int main(int argc, char * argv[])
         // all drawing should happen betweem clear_screen and next_frame
             //backgrounds drawn first
             gf2d_sprite_draw_image(sprite,vector2d(0,0));
-            
+        gf2d_space_update(space);
+
+            gf2d_space_draw(space);
             //UI elements last
             gf2d_sprite_draw(
                 mouse,
@@ -74,6 +183,8 @@ int main(int argc, char * argv[])
         if (keys[SDL_SCANCODE_ESCAPE])done = 1; // exit condition
         slog("Rendering at %f FPS",gf2d_graphics_get_frames_per_second());
     }
+    
+    gf2d_space_free(space);
     slog("---==== END ====---");
     return 0;
 }
