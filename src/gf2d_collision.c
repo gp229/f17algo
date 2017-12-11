@@ -2,6 +2,7 @@
 #include "simple_logger.h"
 #include "gf2d_draw.h"
 
+
 void gf2d_body_clear(Body *body)
 {
     if (!body)return;
@@ -407,7 +408,6 @@ void gf2d_body_post_step(Body *body,Space *space)
 
 void gf2d_body_step(Body *body,Space *space,float step)
 {
-    int i= 0;
     int attempts = 0;
     int collided = 0;
     Collision collision;
@@ -418,12 +418,20 @@ void gf2d_body_step(Body *body,Space *space,float step)
     Shape *shape,*collisionShape = NULL;
     int bodies,staticShapes;
     Vector2D velocity;
+	keynode *cursor;
+	spatialhash *spatialmap;
+	int gridcell;
+	int radius;
+	int startingColumn, endingColumn, startingRow, endingRow;
+	int rowsCount, columnCount;
+	int i, j;
+
     if (!body)return;
     if (!space)return;
     bodies = gf2d_list_get_count(space->bodyList);
     staticShapes = gf2d_list_get_count(space->staticShapes);
-
-    vector2d_scale(velocity,body->velocity,space->timeStep);
+	 
+	vector2d_scale(velocity,body->velocity,space->timeStep);
     
 //    gf2d_body_adjust_collision_bounds_velocity(body,space->slop,space->bounds,&velocity);
 
@@ -444,20 +452,113 @@ void gf2d_body_step(Body *body,Space *space,float step)
         //body/body collision check
 
 // based on "body" generate a list of bodies of potential conflict based on your algorith of choice
-        for (i = 0; i < bodies; i++)
-        {
-            other = (Body*)gf2d_list_get_nth(space->bodyList,i); // use your list instead of the space body list here
-            if ((!other)||// error check
-                (other == body))continue;//dont self collide
-            if(!(other->layer & body->layer))continue;// only we share a layer
-            if ((body->team)&&(other->team == body->team))// no friendly fire
-                continue;
-            if (gf2d_body_collide(body,other,&poc,&normal))
-            {
-                collider = other;
-                goto attempt;
-            }
-        }
+		
+		
+		
+		if (!body) return;
+		spatialmap = space->spatialHash;
+		if (body->shape->type == ST_CIRCLE)
+		{
+			radius = body->shape->s.c.r;
+			startingColumn = (body->position.x - radius) * spatialmap->conversionFactor;
+			endingColumn = (body->position.x + radius) * spatialmap->conversionFactor;
+			startingRow = (body->position.y - radius) * spatialmap->conversionFactor;
+			endingRow = (body->position.y + radius) * spatialmap->conversionFactor;
+		}
+		else if (body->shape->type == ST_RECT)
+		{
+
+			startingColumn = (body->position.x - body->shape->s.r.x) * spatialmap->conversionFactor;
+			endingColumn = (body->position.x + body->shape->s.r.w) * spatialmap->conversionFactor;
+			startingRow = (body->position.y - body->shape->s.r.y) * spatialmap->conversionFactor;
+			endingRow = (body->position.y + body->shape->s.r.h) * spatialmap->conversionFactor;
+		}
+		if (startingColumn < 0)
+		{
+			startingColumn = 0;
+		}
+		if (endingColumn > spatialmap->width)
+		{
+			endingColumn = spatialmap->width;
+		}
+		if (startingRow < 0)
+		{
+			startingRow = 0;
+		}
+		if (endingRow > spatialmap->height)
+		{
+			endingRow = spatialmap->height;
+		}
+		startingRow--;
+		startingColumn--;
+		endingColumn--;
+		endingRow--;
+		gridcell = startingColumn + startingRow * spatialmap->width;
+		columnCount = endingColumn - startingColumn;
+		rowsCount = endingRow - startingRow;
+		gridcell--;
+		for (i = 0; i < rowsCount; i++)
+		{
+			for (j = 0; j < columnCount; j++)
+			{
+				gridcell++;
+				cursor = &space->spatialHash->hashtable->list[gridcell];
+				while (cursor != NULL)
+				{
+					other = (Body*)cursor->value; // use your list instead of the space body list here
+					if (other == NULL)
+					{
+						break;
+					}
+					if (other->layer == NULL)
+					{
+						break;
+					}
+					if ((!other) || (other == body))
+					{
+						cursor = cursor->next;
+						continue;//dont self collide
+					}
+					else if (!(other->layer & body->layer))
+					{
+						cursor = cursor->next; 
+						continue;// only we share a layer
+					}
+					else if ((body->team) && (other->team == body->team))// no friendly fire
+					{
+						cursor = cursor->next;
+						continue;
+					}
+					else if (gf2d_body_collide(body, other, &poc, &normal))
+					{
+						collider = other;
+						cursor = cursor->next;
+						goto attempt;
+					}
+					else
+					{
+						cursor = cursor->next;
+					}
+				}
+			}
+			gridcell += spatialmap->width - columnCount;
+		}
+	/*
+		for (i = 0; i < bodies; i++)
+		{
+			other = (Body*)gf2d_list_get_nth(space->bodyList, i); // use your list instead of the space body list here
+			if ((!other) ||// error check
+				(other == body))continue;//dont self collide
+			if (!(other->layer & body->layer))continue;// only we share a layer
+			if ((body->team) && (other->team == body->team))// no friendly fire
+				continue;
+			if (gf2d_body_collide(body, other, &poc, &normal))
+			{
+				collider = other;
+				goto attempt;
+			}
+		}
+		*/
         for (i = 0; i < staticShapes; i++)
         {
             shape = (Shape*)gf2d_list_get_nth(space->staticShapes,i);
@@ -575,6 +676,7 @@ void gf2d_space_update(Space *space)
     {
         body = (Body*)gf2d_list_get_nth(space->bodyList,i);
         if (!body)continue;
+
         body->inactive = 0;
     }
     for (s = 0; s < 1; s += space->timeStep)
@@ -635,5 +737,6 @@ Collision gf2d_space_shape_test(Space *space,Shape shape)
     gf2d_space_shape_collision_test(space,shape, &c);
     return c;
 }
+
 
 /*eol@eof*/

@@ -2,10 +2,11 @@
 #ifndef _HASHMAP_H_
 #define _HASHMAP_H_
 
+#include "linkedlist.h"
+
 typedef struct keynode_S keynode;
 
 struct keynode_S{
-	char *key;
 	void *value;
 	struct keynode_S *next;
 };
@@ -18,9 +19,8 @@ typedef struct hashmap
 }hashmap;
 
 hashmap * hash_new(int size);
-hashmap * insert(hashmap *map, char *key, void *value);
-void * get(hashmap *map, char *key);
-hashmap * delete_hash(hashmap *map, char *key);
+hashmap * insert(hashmap *map, int *key, void *value);
+hashmap * delete_hash(keynode **cursor, hashmap *map);
 hashmap * hash_free(hashmap *map);
 void print_hash(hashmap *map);
 

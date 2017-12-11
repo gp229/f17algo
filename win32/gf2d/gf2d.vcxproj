@@ -93,6 +93,7 @@
     <ClCompile Include="..\..\src\hashmap.c" />
     <ClCompile Include="..\..\src\linkedlist.c" />
     <ClCompile Include="..\..\src\simple_logger.c" />
+    <ClCompile Include="..\..\src\spatialhash.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\gf2d_collision.h" />
@@ -108,6 +109,7 @@
     <ClInclude Include="..\..\include\hashmap.h" />
     <ClInclude Include="..\..\include\linkedlist.h" />
     <ClInclude Include="..\..\include\simple_logger.h" />
+    <ClInclude Include="..\..\include\spatialhash.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -5,7 +5,6 @@
 #include "simple_logger.h"
 #include "gf2d_draw.h"
 #include "gf2d_collision.h"
-#include "hashmap.h"
 
 int main(int argc, char * argv[])
 {
@@ -13,9 +12,6 @@ int main(int argc, char * argv[])
 	int done = 0;
 	const Uint8 * keys;
 	Sprite *sprite = NULL;
-	hashmap *mymap;
-	char *temp;
-
 	int mx,my,i;
 	float mf = 0;
 	Sprite *mouse = NULL;
@@ -50,54 +46,16 @@ int main(int argc, char * argv[])
 		1,
 		0.1);
 
-	shape[0] = gf2d_shape_circle(0,0, 5);
-	shape[1] = gf2d_shape_circle(20,0, 25);
-	shape[2] = gf2d_shape_rect(-32,-32,64,64);
-	shape[3] = gf2d_shape_rect(-16,-16, 32,32);
-
-	mymap = hash_new(2);
-
-	mymap = insert(mymap, "1", "stuff");
-	mymap = insert(mymap, "11", "stuff");
-
-	mymap = insert(mymap, "21", "stuff");
-
-	mymap = insert(mymap, "2314fasdf", "stuff");
-	mymap = insert(mymap, "12342314reeeeqwrqwr", "stuff");
-
-	mymap = insert(mymap, "dfsadfasdfasdf", "stuff");
-	mymap = insert(mymap, "key745312453312341", "stuff");
-	mymap = insert(mymap, "asdfsdfvzvvxczv", "stuff");
-	mymap = insert(mymap, "qqqqqqqqweeeeeeeeeee", "delete this one");
-	mymap = insert(mymap, "rrrrrrrrrrrrrrr", "stuff");
-	mymap = insert(mymap, "tretertert", "stuff");
-	mymap = insert(mymap, "vczccvzxvvzxcv", "stuff");
-	mymap = insert(mymap, "key1313", "stuff");
-	mymap = insert(mymap, "key21", "stuff");
-	mymap = insert(mymap, "key31", "stuff");
-	mymap = insert(mymap, "key4432", "stuff123");
-	mymap = insert(mymap, "key54334", "stuff");
-	mymap = insert(mymap, "key6321", "stuff");
-	mymap = insert(mymap, "key733", "stuff");
-	mymap = insert(mymap, "key733112341234234", "stuff");
-	mymap = insert(mymap, "key7wqrqwer33", "stuff");
-	mymap = insert(mymap, "key1ewqr2341733", "stuff");
-	mymap = insert(mymap, "asdfadfkey23425733", "stuff");
-	mymap = insert(mymap, "key7453124533", "stuff");
-	mymap = insert(mymap, "key76342533", "stuff");
-	mymap = insert(mymap, "sdafasdfas", "stuff");
-	mymap = insert(mymap, "qwrqw231322222er", "stuff");
-	mymap = insert(mymap, "qwerqwerfsafazzz", "stuff");
-	print_hash(mymap);
-
-	temp = (char*)get(mymap, "key4432");
-	mymap = delete_hash(mymap, "key4432");
-	print_hash(mymap);
+	shape[0] = gf2d_shape_circle(0, 0, 5);
+	shape[1] = gf2d_shape_circle(0, 0, 70);
+	shape[2] = gf2d_shape_rect(-32, -32, 64, 64);
+	shape[3] = gf2d_shape_rect(-16, -16, 32, 32);
 
 
-//	gf2d_space_add_static_shape(space,gf2d_shape_rect(200,500, 512,32));
+    gf2d_space_add_static_shape(space,gf2d_shape_rect(200,530, 512,32));
 	/* Stress test*/
-	for (i = 0; i < 100;i++)
+	
+	for (i = 0; i < 1000;i++)
 	{
 		gf2d_body_set(
 			&body[i],
@@ -117,42 +75,48 @@ int main(int argc, char * argv[])
 			NULL);
 		gf2d_space_add_body(space,&body[i]);
 	}
-/* collision test*/
-//         gf2d_body_set(
-//             &body[0],
-//             "Body A",
-//             ALL_LAYERS,
-//             0,
-//             vector2d(100,300),
-//             vector2d(-1,0),
-//             1000,
-//             0,
-//             0,
-//             &shape[2],
-//             NULL,
-//             NULL,
-//             NULL);
-//          gf2d_space_add_body(space,&body[0]);
-//         gf2d_body_set(
-//             &body[1],
-//             "Body B",
-//             ALL_LAYERS,
-//             0,
-//             vector2d(600,340),
-//             vector2d(1,1),
-//             10,
-//             1,
-//             1,
-//             &shape[0],
-//             NULL,
-//             NULL,
-//             NULL);
-//         gf2d_space_add_body(space,&body[1]);
+	
+	
 
+/* collision test*/
+	/*
+         gf2d_body_set(
+             &body[0],
+             "Body A",
+             ALL_LAYERS,
+             0,
+             vector2d(210,290),
+             vector2d(0,6),
+             10,
+             1,
+             1,
+             &shape[1],
+             NULL,
+             NULL,
+             NULL);
+          gf2d_space_add_body(space,&body[0]);
+
+		  gf2d_body_set(
+             &body[1],
+             "Body B",
+             ALL_LAYERS,
+             0,
+             vector2d(200,600),
+             vector2d(0,0),
+             1000,
+             0,
+             10,
+             &shape[2],
+             NULL,
+             NULL,
+             NULL);
+         gf2d_space_add_body(space,&body[1]);
+	*/	 
  //*/
     /*main game loop*/
     while(!done)
     {
+
         SDL_PumpEvents();   // update SDL's internal event structures
         keys = SDL_GetKeyboardState(NULL); // get the keyboard state for this frame
         /*update things here*/
@@ -164,7 +128,8 @@ int main(int argc, char * argv[])
         gf2d_graphics_clear_screen();// clears drawing buffers
         // all drawing should happen betweem clear_screen and next_frame
             //backgrounds drawn first
-            gf2d_sprite_draw_image(sprite,vector2d(0,0));
+		space->spatialHash = spatialhash_refresh(space);
+        gf2d_sprite_draw_image(sprite,vector2d(0,0));
         gf2d_space_update(space);
 
             gf2d_space_draw(space);

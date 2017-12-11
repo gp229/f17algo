@@ -4,8 +4,20 @@
 #include "gf2d_shape.h"
 #include "gf2d_list.h"
 #include "gf2d_text.h"
+#include "hashmap.h"
+
 
 #define ALL_LAYERS 0xffffffff
+
+typedef struct spatialhash
+{
+	int cellsize;
+	int width;
+	int height;
+	float conversionFactor;
+	int buckets;
+	hashmap *hashtable;
+}spatialhash;
 
 typedef struct Collision_S Collision;
 
@@ -47,6 +59,7 @@ typedef struct
     Vector2D    gravity;        /**<global gravity pull direction*/
     float       dampening;      /**<rate of movement degrade  ambient frictions*/
     float       slop;           /**<how much to correct for body overlap*/
+	spatialhash	*spatialHash;
 }Space;
 
 
@@ -165,5 +178,5 @@ void gf2d_space_update(Space *space);
  * @return the collision information
  */
 Collision gf2d_space_shape_test(Space *space,Shape shape);
-
+double FitSquares(double x, double y, int n);
 #endif
